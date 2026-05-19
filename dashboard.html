@@ -510,10 +510,10 @@ body {
 
     <button class="kpi" onclick="abrirModal('carga')">
       <div class="kpi-label">Carga por headhunter <span class="kpi-arrow">→</span></div>
-      <div class="kpi-value">17 <span class="secondary">vs</span> 8</div>
+      <div class="kpi-value">13 <span class="secondary">vs</span> 5</div>
       <div class="kpi-detail">Anayelli sobrecargada · tope sano <strong>6-7</strong></div>
       <div class="kpi-bar"><div class="kpi-bar-fill alert" style="width:100%"></div></div>
-      <div class="kpi-mini"><div class="kpi-mini-item"><span class="lbl">Anayelli</span><span class="val">17 act.</span></div><div class="kpi-mini-item"><span class="lbl">Carla</span><span class="val">8 act.</span></div></div>
+      <div class="kpi-mini"><div class="kpi-mini-item"><span class="lbl">Anayelli</span><span class="val">13 act.</span></div><div class="kpi-mini-item"><span class="lbl">Carla</span><span class="val">5 act.</span></div></div>
     </button>
   </div>
 
@@ -535,7 +535,7 @@ body {
   <div class="section-title"><span>Vacantes activas</span><a class="section-link" onclick="showPageById('vacantes')">Ver consolidado →</a></div>
 
   <div class="vista-bar">
-    <button class="vista-btn active" onclick="aplicarVista('todas', this)">Todas <span class="vista-count">25</span></button>
+    <button class="vista-btn active" onclick="aplicarVista('todas', this)">Todas <span class="vista-count">18</span></button>
     <button class="vista-btn" onclick="aplicarVista('antiguedad', this)">Mayor antigüedad</button>
     <button class="vista-btn" onclick="aplicarVista('activas', this)">Solo activas</button>
     <button class="vista-btn" onclick="aplicarVista('ternas', this)">Solo ternas</button>
@@ -1021,9 +1021,10 @@ function llenarFiltroClientes() {
 
 function aplicarVista(vista, btn) {
   if (btn) { btn.parentElement.querySelectorAll('.vista-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
-  let filtradas = VACANTES.filter(v => v.estado !== 'garantia' && v.estado !== 'onhold');
+  // Solo verdaderamente activas: en búsqueda, terna o propuesta. NO facturadas, NO garantía, NO on hold.
+  let filtradas = VACANTES.filter(v => ['activa','terna','propuesta'].includes(v.estado));
   if (vista === 'antiguedad') filtradas.sort((a,b) => b.dias - a.dias);
-  else if (vista === 'activas') filtradas = filtradas.filter(v => v.estado === 'activa' || v.estado === 'facturado');
+  else if (vista === 'activas') filtradas = filtradas.filter(v => v.estado === 'activa');
   else if (vista === 'ternas') filtradas = filtradas.filter(v => v.estado === 'terna');
   else if (vista === 'propuestas') filtradas = filtradas.filter(v => v.estado === 'propuesta');
   else if (vista === 'anayelli') filtradas = filtradas.filter(v => v.hh === 'Anayelli');
@@ -1047,7 +1048,8 @@ function aplicarVistaV(vista, btn) {
 function toggleFiltrosAv() { document.getElementById('advFilters').classList.toggle('active'); }
 function aplicarFiltrosAvanzados() {
   document.querySelectorAll('#dashboard .vista-bar .vista-btn').forEach(b => b.classList.remove('active'));
-  let filtradas = VACANTES.filter(v => v.estado !== 'garantia' && v.estado !== 'onhold');
+  // Solo verdaderamente activas: en búsqueda, terna o propuesta
+  let filtradas = VACANTES.filter(v => ['activa','terna','propuesta'].includes(v.estado));
   const tipo = document.getElementById('advTipo').value;
   const cliente = document.getElementById('advCliente').value;
   const order = document.getElementById('advOrder').value;
@@ -1096,7 +1098,8 @@ function toggleComp(modo) {
   renderComposicion();
 }
 function renderComposicion() {
-  const activas = VACANTES.filter(v => v.estado !== 'garantia' && v.estado !== 'onhold');
+  // Solo verdaderamente activas: en búsqueda, terna o propuesta
+  const activas = VACANTES.filter(v => ['activa','terna','propuesta'].includes(v.estado));
   const tipos = ['especialista','operativa','mando','ejecutiva','administrativo'];
   const colores = {'operativa':'var(--c-operativa)','mando':'var(--c-mando)','ejecutiva':'var(--c-ejecutiva)','especialista':'var(--c-especialista)','administrativo':'var(--c-admin)'};
   let data = {};
@@ -1158,8 +1161,9 @@ function abrirModal(tipo) {
     footText = 'Vencido: <strong style="color:var(--alert)">$36,516</strong>';
   } else if (tipo === 'carga') {
     title = 'Carga por headhunter'; subtitle = 'Tope sano: 6-7 vacantes';
-    const anayelli = VACANTES.filter(v => v.hh === 'Anayelli' && v.estado !== 'garantia' && v.estado !== 'onhold');
-    const carla = VACANTES.filter(v => v.hh === 'Carla' && v.estado !== 'garantia' && v.estado !== 'onhold');
+    // Solo verdaderamente activas
+    const anayelli = VACANTES.filter(v => v.hh === 'Anayelli' && ['activa','terna','propuesta'].includes(v.estado));
+    const carla = VACANTES.filter(v => v.hh === 'Carla' && ['activa','terna','propuesta'].includes(v.estado));
     html = `<div class="modal-row"><span class="id-m">AP</span><div><div class="nombre-m">Anayelli Portilla</div><div class="meta-m">Headhunter Jr.</div></div><div><div class="nombre-m">${anayelli.length} vacantes</div><div class="meta-m">${anayelli.filter(v=>v.estado==='activa').length} activa · ${anayelli.filter(v=>v.estado==='terna').length} terna</div></div><div class="monto-m-block"><div class="monto-m-val alert">SOBRECARGADA</div></div></div>
     <div class="modal-row"><span class="id-m">CB</span><div><div class="nombre-m">Carla Berrón</div><div class="meta-m">Líder Headhunting</div></div><div><div class="nombre-m">${carla.length} vacantes</div><div class="meta-m">${carla.filter(v=>v.estado==='activa').length} activa · ${carla.filter(v=>v.estado==='propuesta').length} propuesta</div></div><div class="monto-m-block"><div class="monto-m-val">${carla.length>7?'SOBRE TOPE':'OK'}</div></div></div>`;
     footText = `Total: <strong>${anayelli.length + carla.length} vacantes</strong>`;
